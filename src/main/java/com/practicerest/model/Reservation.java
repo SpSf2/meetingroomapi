@@ -6,6 +6,9 @@ public class Reservation {
     private String roomName;
     private String reservedBy;
 
+    public Reservation() {
+    }
+
     public Reservation(Long id, String roomName, String reservedBy) {
         this.id = id;
         this.roomName = roomName;
@@ -22,5 +25,17 @@ public class Reservation {
 
     public String getReservedBy() {
         return reservedBy;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setRoomName(String roomName) {
+        this.roomName = roomName;
+    }
+
+    public void setReservedBy(String reservedBy) {
+        this.reservedBy = reservedBy;
     }
 }
