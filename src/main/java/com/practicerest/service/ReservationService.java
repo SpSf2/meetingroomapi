@@ -1,34 +1,46 @@
 package com.practicerest.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
 import com.practicerest.model.Reservation;
+import com.practicerest.repository.ReservationRepository;
 
 @Service
 public class ReservationService {
 
-    private final List<Reservation> reservations = new ArrayList<>(List.of(
-            new Reservation(1L, "Sala Norte", "Carlos"),
-            new Reservation(2L, "Sala Sur", "Lucía"),
-            new Reservation(3L, "Sala Este", "Marta")
-    ));
+    /* Se modifica todo el service con metodos similares a los anteriores, que cumplen
+    la misma función, pero que usen el repositorio de la entidad Reservation */
+    
+    private final ReservationRepository reservationRepository;
+
+    public ReservationService(ReservationRepository reservationRepository) {
+        this.reservationRepository = reservationRepository;
+    }
 
     public List<Reservation> getAllReservations() {
-        return reservations;
+        return reservationRepository.findAll();
     }
 
     public Optional<Reservation> getReservationById(Long id) {
-        return reservations.stream()
-                .filter(reservation -> reservation.getId().equals(id))
-                .findFirst();
+        return reservationRepository.findById(id);
     }
 
     public Reservation createReservation(Reservation reservation) {
-        reservations.add(reservation);
-        return reservation;
+        return reservationRepository.save(reservation);
     }
+
+    public Optional<Reservation> updateReservation(Long id, Reservation reservation) {
+    
+        return reservationRepository.findById(id)
+                                    .map(existingReservation -> {
+                existingReservation.setRoomName(reservation.getRoomName());
+                
+        existingReservation.setReservedBy(reservation.getReservedBy());
+                return reservationRepository.save(existingReservation);
+            });
+    }
+
 }
