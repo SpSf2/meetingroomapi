@@ -12,8 +12,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.practicerest.model.Reservation;
+import com.practicerest.dto.request.ReservationRequest;
+import com.practicerest.entity.Reservation;
 import com.practicerest.service.ReservationService;
+
+import jakarta.validation.Valid;
 
 @RestController
 public class ReservationController {
@@ -39,14 +42,24 @@ public class ReservationController {
 
     //Metodo para crear una reserva
     @PostMapping("/reservations")
-    public ResponseEntity<Reservation> createReservation(@RequestBody Reservation reservation) {
+    public ResponseEntity<Reservation> createReservation(@Valid @RequestBody ReservationRequest request) {
+        Reservation reservation = new Reservation();
+        reservation.setRoomName(request.getRoomName());
+        reservation.setReservedBy(request.getReservedBy());
+
         Reservation createdReservation = reservationService.createReservation(reservation);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdReservation);
     }
 
     //Metodo para actualizar una reserva
     @PutMapping("/reservations/{id}")
-    public ResponseEntity<Reservation> updateReservation(@PathVariable Long id, @RequestBody Reservation reservation) {
+    public ResponseEntity<Reservation> updateReservation(@PathVariable Long id,
+            @Valid @RequestBody ReservationRequest request) {
+
+        Reservation reservation = new Reservation();
+        reservation.setRoomName(request.getRoomName());
+        reservation.setReservedBy(request.getReservedBy());
+
         return reservationService.updateReservation(id, reservation)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

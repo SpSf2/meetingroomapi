@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import com.practicerest.model.Reservation;
+import com.practicerest.entity.Reservation;
 import com.practicerest.repository.ReservationRepository;
 
 @Service

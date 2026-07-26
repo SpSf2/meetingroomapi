@@ -1,4 +1,4 @@
-package com.practicerest.model;
+package com.practicerest.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
