@@ -43,4 +43,12 @@ public class ReservationService {
             });
     }
 
+    public boolean deleteReservation(Long id) {
+        if (reservationRepository.existsById(id)) {
+            reservationRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
 }
