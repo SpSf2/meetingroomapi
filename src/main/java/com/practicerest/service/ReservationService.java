@@ -1,8 +1,11 @@
 package com.practicerest.service;
 
-import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.practicerest.entity.Reservation;
@@ -20,8 +23,20 @@ public class ReservationService {
         this.reservationRepository = reservationRepository;
     }
 
+    /*Comentamos este método y aplicamos el siguiente para implementar Paginación 
     public List<Reservation> getAllReservations() {
         return reservationRepository.findAll();
+    }  */
+    
+    public Page<Reservation> getAllReservations(int page, int size, 
+                                String sortBy, String direction) {
+
+         Sort sort = direction.equalsIgnoreCase("desc")  //new change: orden by sort 
+            ? Sort.by(sortBy).descending()
+            : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        return reservationRepository.findAll(pageable);
     }
 
     public Optional<Reservation> getReservationById(Long id) {

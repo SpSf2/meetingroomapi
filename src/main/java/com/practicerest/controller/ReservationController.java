@@ -1,7 +1,6 @@
 package com.practicerest.controller;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -10,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.practicerest.dto.request.ReservationRequest;
@@ -26,10 +26,21 @@ public class ReservationController {
     public ReservationController(ReservationService reservationService) {
         this.reservationService = reservationService;
     }
-    //Metodo para obtener todas las reservas
+    /*Metodo para obtener todas las reservas lo comentamos para mejorarlo
     @GetMapping("/reservations")
     public List<Reservation> getReservations() {
         return reservationService.getAllReservations();
+    }  */
+
+    //Método para obtener las reservas por paginación
+    @GetMapping("/reservations")
+    public Page<Reservation> getReservations(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "2") int size,
+            @RequestParam(defaultValue = "id") String sortBy, //nuevo parametro para ordenar por id
+            @RequestParam(defaultValue = "asc") String direction) { // para orden asc
+
+        return reservationService.getAllReservations(page, size, sortBy, direction);
     }
 
     //Metodo para obtener una reserva por su id
