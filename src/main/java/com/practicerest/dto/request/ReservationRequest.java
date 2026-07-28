@@ -16,6 +16,8 @@ public class ReservationRequest {
     message = "Reserved by must contain only letters and spaces")
     private String reservedBy;
 
+    private Long categoryId;
+
     public ReservationRequest() {
     }
 
@@ -27,11 +29,19 @@ public class ReservationRequest {
         return reservedBy;
     }
 
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
     public void setRoomName(String roomName) {
         this.roomName = roomName;
     }
 
     public void setReservedBy(String reservedBy) {
         this.reservedBy = reservedBy;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
     }
 }

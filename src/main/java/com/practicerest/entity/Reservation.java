@@ -1,9 +1,13 @@
 package com.practicerest.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 @Entity
 public class Reservation {
@@ -13,6 +17,11 @@ public class Reservation {
     private Long id;
     private String roomName;
     private String reservedBy;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    @JsonBackReference
+    private ReservationCategory category;
    
     public Reservation() {
     }
@@ -45,5 +54,13 @@ public class Reservation {
 
     public void setReservedBy(String reservedBy) {
         this.reservedBy = reservedBy;
+    }
+
+    public ReservationCategory getCategory() {
+    return category;
+    }
+
+    public void setCategory(ReservationCategory category) {
+        this.category = category;
     }
 }

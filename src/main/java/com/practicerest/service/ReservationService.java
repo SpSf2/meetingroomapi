@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.practicerest.entity.Reservation;
+import com.practicerest.repository.ReservationCategoryRepository;
 import com.practicerest.repository.ReservationRepository;
 
 @Service
@@ -18,9 +19,13 @@ public class ReservationService {
     la misma función, pero que usen el repositorio de la entidad Reservation */
     
     private final ReservationRepository reservationRepository;
+    private final ReservationCategoryRepository reservationCategoryRepository;
 
-    public ReservationService(ReservationRepository reservationRepository) {
-        this.reservationRepository = reservationRepository;
+    // Constructor de reservationCategoryRepository
+    public ReservationService(ReservationRepository reservationRepository,
+                ReservationCategoryRepository reservationCategoryRepository) {
+    this.reservationRepository = reservationRepository;
+    this.reservationCategoryRepository = reservationCategoryRepository;
     }
 
     /*Comentamos este método y aplicamos el siguiente para implementar Paginación 
@@ -43,17 +48,29 @@ public class ReservationService {
         return reservationRepository.findById(id);
     }
 
-    public Reservation createReservation(Reservation reservation) {
+    //Método modificado para que acepte y cree una categoría
+    public Reservation createReservation(Reservation reservation, Long categoryId) {
+        if (categoryId != null) {
+            reservationCategoryRepository.findById(categoryId)
+                                         .ifPresent(reservation::setCategory);
+        }
+
         return reservationRepository.save(reservation);
     }
 
-    public Optional<Reservation> updateReservation(Long id, Reservation reservation) {
+    public Optional<Reservation> updateReservation(Long id, Reservation reservation, 
+                                                    Long categoryId) {
     
         return reservationRepository.findById(id)
                                     .map(existingReservation -> {
                 existingReservation.setRoomName(reservation.getRoomName());
                 
         existingReservation.setReservedBy(reservation.getReservedBy());
+
+                if (categoryId != null) {
+                    reservationCategoryRepository.findById(categoryId)
+                            .ifPresent(existingReservation::setCategory);
+                }
                 return reservationRepository.save(existingReservation);
             });
     }

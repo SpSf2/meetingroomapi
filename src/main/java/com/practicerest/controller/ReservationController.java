@@ -53,12 +53,14 @@ public class ReservationController {
 
     //Metodo para crear una reserva
     @PostMapping("/reservations")
-    public ResponseEntity<Reservation> createReservation(@Valid @RequestBody ReservationRequest request) {
+    public ResponseEntity<Reservation> createReservation
+                                    (@Valid @RequestBody ReservationRequest request) {
         Reservation reservation = new Reservation();
         reservation.setRoomName(request.getRoomName());
         reservation.setReservedBy(request.getReservedBy());
 
-        Reservation createdReservation = reservationService.createReservation(reservation);
+        Reservation createdReservation = reservationService.createReservation(reservation,
+                                                    request.getCategoryId());
         return ResponseEntity.status(HttpStatus.CREATED).body(createdReservation);
     }
 
@@ -71,9 +73,10 @@ public class ReservationController {
         reservation.setRoomName(request.getRoomName());
         reservation.setReservedBy(request.getReservedBy());
 
-        return reservationService.updateReservation(id, reservation)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return reservationService.updateReservation(id, reservation, 
+                    request.getCategoryId())
+                                .map(ResponseEntity::ok)
+                                .orElse(ResponseEntity.notFound().build());
     }
 
     //Metodo para eliminar una reserva
