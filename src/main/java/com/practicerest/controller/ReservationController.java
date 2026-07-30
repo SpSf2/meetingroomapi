@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.practicerest.dto.request.ReservationRequest;
+import com.practicerest.dto.response.ReservationResponse;
 import com.practicerest.entity.Reservation;
 import com.practicerest.service.ReservationService;
 
@@ -34,7 +35,7 @@ public class ReservationController {
 
     //Método para obtener las reservas por paginación
     @GetMapping("/reservations")
-    public Page<Reservation> getReservations(
+    public Page<ReservationResponse> getReservations(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "2") int size,
             @RequestParam(defaultValue = "id") String sortBy, //nuevo parametro para ordenar por id
@@ -45,28 +46,28 @@ public class ReservationController {
 
     //Metodo para obtener una reserva por su id
     @GetMapping("/reservations/{id}")
-    public ResponseEntity<Reservation> getReservationById(@PathVariable Long id) {
-        return reservationService.getReservationById(id)
+    public ResponseEntity<ReservationResponse> getReservationById(@PathVariable Long id) {
+        return reservationService.getReservationResponseById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    //Metodo para crear una reserva
+    //Metodo para crear una reserva(se agregó Response)
     @PostMapping("/reservations")
-    public ResponseEntity<Reservation> createReservation
+    public ResponseEntity<ReservationResponse> createReservation
                                     (@Valid @RequestBody ReservationRequest request) {
         Reservation reservation = new Reservation();
         reservation.setRoomName(request.getRoomName());
         reservation.setReservedBy(request.getReservedBy());
 
-        Reservation createdReservation = reservationService.createReservation(reservation,
+        ReservationResponse createdReservation = reservationService.createReservation(reservation,
                                                     request.getCategoryId());
         return ResponseEntity.status(HttpStatus.CREATED).body(createdReservation);
     }
 
     //Metodo para actualizar una reserva
     @PutMapping("/reservations/{id}")
-    public ResponseEntity<Reservation> updateReservation(@PathVariable Long id,
+    public ResponseEntity<ReservationResponse> updateReservation(@PathVariable Long id,
             @Valid @RequestBody ReservationRequest request) {
 
         Reservation reservation = new Reservation();
