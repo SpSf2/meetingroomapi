@@ -5,6 +5,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -27,7 +28,7 @@ public class Reservation {
     @JsonBackReference
     private ReservationCategory category;
 
-    @ManyToMany  
+    @ManyToMany(fetch = FetchType.LAZY)  
     @JoinTable(name = "reservation_equipment",
     joinColumns = @JoinColumn(name = "reservation_id"),
     inverseJoinColumns = @JoinColumn(name = "equipment_id"))

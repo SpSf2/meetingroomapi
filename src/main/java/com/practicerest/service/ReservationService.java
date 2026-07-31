@@ -1,5 +1,6 @@
 package com.practicerest.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -9,12 +10,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.practicerest.dto.response.EquipmentResponse;
 import com.practicerest.dto.response.ReservationCategoryResponse;
 import com.practicerest.dto.response.ReservationResponse;
+import com.practicerest.entity.Equipment;
 import com.practicerest.entity.Reservation;
 import com.practicerest.repository.EquipmentRepository;
 import com.practicerest.repository.ReservationCategoryRepository;
 import com.practicerest.repository.ReservationRepository;
+
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ReservationService {
@@ -39,7 +44,7 @@ public class ReservationService {
     public List<Reservation> getAllReservations() {
         return reservationRepository.findAll();
     }  */
-    
+    @Transactional(readOnly = true)
     public Page<ReservationResponse> getAllReservations(int page, int size, 
                                 String sortBy, String direction) {
 
@@ -52,6 +57,7 @@ public class ReservationService {
                                     .map(this::mapToResponse);
     }
 
+    
     public Optional<Reservation> getReservationById(Long id) {
         return reservationRepository.findById(id);
     }
@@ -112,9 +118,22 @@ public class ReservationService {
             categoryResponse.setName(reservation.getCategory().getName());
             response.setCategory(categoryResponse);
         }
+        if (reservation.getEquipment() != null && !reservation.getEquipment().isEmpty()) {
+            List<EquipmentResponse> equipmentResponses = new ArrayList<>();
+
+            for (Equipment equipment : reservation.getEquipment()) {
+                EquipmentResponse equipmentResponse = new EquipmentResponse();
+                equipmentResponse.setId(equipment.getId());
+                equipmentResponse.setName(equipment.getName());
+                equipmentResponses.add(equipmentResponse);
+            }
+
+            response.setEquipment(equipmentResponses);
+        }
         return response;
     }
 
+    @Transactional(readOnly = true)
     public Optional<ReservationResponse> getReservationResponseById(Long id) {
         return reservationRepository.findById(id)
                                     .map(this::mapToResponse);
