@@ -46,7 +46,8 @@ public class ReservationController {
 
     //Metodo para obtener una reserva por su id
     @GetMapping("/reservations/{id}")
-    public ResponseEntity<ReservationResponse> getReservationById(@PathVariable Long id) {
+    public ResponseEntity<ReservationResponse> getReservationById
+                                        (@PathVariable Long id) {
         return reservationService.getReservationResponseById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -59,23 +60,23 @@ public class ReservationController {
         Reservation reservation = new Reservation();
         reservation.setRoomName(request.getRoomName());
         reservation.setReservedBy(request.getReservedBy());
-
+        
         ReservationResponse createdReservation = reservationService.createReservation(reservation,
-                                                    request.getCategoryId());
+                                            request.getCategoryId(), request.getEquipmentIds());
         return ResponseEntity.status(HttpStatus.CREATED).body(createdReservation);
     }
 
     //Metodo para actualizar una reserva
     @PutMapping("/reservations/{id}")
-    public ResponseEntity<ReservationResponse> updateReservation(@PathVariable Long id,
-            @Valid @RequestBody ReservationRequest request) {
+    public ResponseEntity<ReservationResponse> updateReservation
+        (@PathVariable Long id, @Valid @RequestBody ReservationRequest request) {
 
         Reservation reservation = new Reservation();
         reservation.setRoomName(request.getRoomName());
         reservation.setReservedBy(request.getReservedBy());
 
         return reservationService.updateReservation(id, reservation, 
-                    request.getCategoryId())
+                    request.getCategoryId(), request.getEquipmentIds())
                                 .map(ResponseEntity::ok)
                                 .orElse(ResponseEntity.notFound().build());
     }
@@ -91,6 +92,5 @@ public class ReservationController {
             return ResponseEntity.notFound().build();
         }
     }
-
 
 }

@@ -1,5 +1,6 @@
 package com.practicerest.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.practicerest.dto.response.ReservationCategoryResponse;
 import com.practicerest.dto.response.ReservationResponse;
 import com.practicerest.entity.Reservation;
+import com.practicerest.repository.EquipmentRepository;
 import com.practicerest.repository.ReservationCategoryRepository;
 import com.practicerest.repository.ReservationRepository;
 
@@ -22,12 +24,15 @@ public class ReservationService {
     
     private final ReservationRepository reservationRepository;
     private final ReservationCategoryRepository reservationCategoryRepository;
+    private final EquipmentRepository equipmentRepository;
 
     // Constructor de reservationCategoryRepository
     public ReservationService(ReservationRepository reservationRepository,
-                ReservationCategoryRepository reservationCategoryRepository) {
+                ReservationCategoryRepository reservationCategoryRepository,
+                EquipmentRepository equipmentRepository) {
     this.reservationRepository = reservationRepository;
     this.reservationCategoryRepository = reservationCategoryRepository;
+    this.equipmentRepository = equipmentRepository;
     }
 
     /*Comentamos este método y aplicamos el siguiente para implementar Paginación 
@@ -52,18 +57,22 @@ public class ReservationService {
     }
 
     //Método modificado para que acepte y cree una categoría con Dto
-    public ReservationResponse createReservation(Reservation reservation, Long categoryId) {
+    public ReservationResponse createReservation(Reservation reservation,
+                            Long categoryId, List<Long> equipmentIds) {
         if (categoryId != null) {
             reservationCategoryRepository.findById(categoryId)
                                         .ifPresent(reservation::setCategory);
+        }
+        if (equipmentIds != null && !equipmentIds.isEmpty()) {
+            reservation.setEquipment(equipmentRepository.findAllById(equipmentIds));
         }
 
         Reservation savedReservation = reservationRepository.save(reservation);
         return mapToResponse(savedReservation);
     }
 
-    public Optional<ReservationResponse> updateReservation(Long id, Reservation reservation,
-                                                       Long categoryId) {
+    public Optional<ReservationResponse> updateReservation(Long id, 
+        Reservation reservation, Long categoryId, List<Long> equipmentIds) {
 
     return reservationRepository.findById(id)
                                 .map(existingReservation -> {
@@ -73,6 +82,9 @@ public class ReservationService {
             if (categoryId != null) {
                 reservationCategoryRepository.findById(categoryId)
                                              .ifPresent(existingReservation::setCategory);
+            }
+            if (equipmentIds != null && !equipmentIds.isEmpty()) {
+                existingReservation.setEquipment(equipmentRepository.findAllById(equipmentIds));
             }
 
             return reservationRepository.save(existingReservation);

@@ -1,5 +1,7 @@
 package com.practicerest.entity;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import jakarta.persistence.Entity;
@@ -7,6 +9,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 
 @Entity
@@ -22,6 +26,12 @@ public class Reservation {
     @JoinColumn(name = "category_id")
     @JsonBackReference
     private ReservationCategory category;
+
+    @ManyToMany  
+    @JoinTable(name = "reservation_equipment",
+    joinColumns = @JoinColumn(name = "reservation_id"),
+    inverseJoinColumns = @JoinColumn(name = "equipment_id"))
+    private List<Equipment> equipment;
    
     public Reservation() {
     }
@@ -62,5 +72,13 @@ public class Reservation {
 
     public void setCategory(ReservationCategory category) {
         this.category = category;
+    }
+
+    public List<Equipment> getEquipment() {
+        return equipment;
+    }
+
+    public void setEquipment(List<Equipment> equipment) {
+        this.equipment = equipment;
     }
 }

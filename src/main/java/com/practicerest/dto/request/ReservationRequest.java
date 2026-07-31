@@ -1,5 +1,7 @@
 package com.practicerest.dto.request;
 
+import java.util.List;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -17,6 +19,8 @@ public class ReservationRequest {
     private String reservedBy;
 
     private Long categoryId;
+
+    private List<Long> equipmentIds;
 
     public ReservationRequest() {
     }
@@ -43,5 +47,13 @@ public class ReservationRequest {
 
     public void setCategoryId(Long categoryId) {
         this.categoryId = categoryId;
+    }
+
+    public List<Long> getEquipmentIds() {
+    return equipmentIds;
+    }
+
+    public void setEquipmentIds(List<Long> equipmentIds) {
+        this.equipmentIds = equipmentIds;
     }
 }
