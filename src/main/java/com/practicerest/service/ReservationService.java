@@ -31,7 +31,7 @@ public class ReservationService {
     private final ReservationCategoryRepository reservationCategoryRepository;
     private final EquipmentRepository equipmentRepository;
 
-    // Constructor de reservationCategoryRepository
+    // Constructor de Repositories
     public ReservationService(ReservationRepository reservationRepository,
                 ReservationCategoryRepository reservationCategoryRepository,
                 EquipmentRepository equipmentRepository) {
@@ -57,11 +57,13 @@ public class ReservationService {
                                     .map(this::mapToResponse);
     }
 
-    
-    public Optional<Reservation> getReservationById(Long id) {
-        return reservationRepository.findById(id);
+    //Método para buscar una Reservation por id
+    @Transactional(readOnly = true)
+    public Optional<ReservationResponse> getReservationResponseById(Long id) {
+        return reservationRepository.findById(id)
+                                    .map(this::mapToResponse);
     }
-
+    
     //Método modificado para que acepte y cree una categoría con Dto
     public ReservationResponse createReservation(Reservation reservation,
                             Long categoryId, List<Long> equipmentIds) {
@@ -77,10 +79,11 @@ public class ReservationService {
         return mapToResponse(savedReservation);
     }
 
+    //Método modificado para que acepte y actualice una categoría con Dto
     public Optional<ReservationResponse> updateReservation(Long id, 
         Reservation reservation, Long categoryId, List<Long> equipmentIds) {
 
-    return reservationRepository.findById(id)
+        return reservationRepository.findById(id)
                                 .map(existingReservation -> {
             existingReservation.setRoomName(reservation.getRoomName());
             existingReservation.setReservedBy(reservation.getReservedBy());
@@ -98,6 +101,7 @@ public class ReservationService {
         .map(this::mapToResponse);
     }
 
+    //Método modificado para que acepte y elimine una categoría 
     public boolean deleteReservation(Long id) {
         if (reservationRepository.existsById(id)) {
             reservationRepository.deleteById(id);
@@ -105,6 +109,7 @@ public class ReservationService {
         }
         return false;
     }
+
 
     private ReservationResponse mapToResponse(Reservation reservation) {
         ReservationResponse response = new ReservationResponse();
@@ -118,6 +123,7 @@ public class ReservationService {
             categoryResponse.setName(reservation.getCategory().getName());
             response.setCategory(categoryResponse);
         }
+        /*
         if (reservation.getEquipment() != null && !reservation.getEquipment().isEmpty()) {
             List<EquipmentResponse> equipmentResponses = new ArrayList<>();
 
@@ -126,16 +132,18 @@ public class ReservationService {
                 equipmentResponse.setId(equipment.getId());
                 equipmentResponse.setName(equipment.getName());
                 equipmentResponses.add(equipmentResponse);
-            }
+            }  */
+        
+          // Equipment usando Streams y el constructor EquipmentResponse(Equipment)
+        if (reservation.getEquipment() != null && !reservation.getEquipment().isEmpty()) {
+            List<EquipmentResponse> equipmentResponses = reservation.getEquipment().stream()
+                    .map(EquipmentResponse::new) // llama al constructor EquipmentResponse(Equipment)
+                    .collect(java.util.stream.Collectors.toList());
 
             response.setEquipment(equipmentResponses);
         }
         return response;
     }
 
-    @Transactional(readOnly = true)
-    public Optional<ReservationResponse> getReservationResponseById(Long id) {
-        return reservationRepository.findById(id)
-                                    .map(this::mapToResponse);
-    }
+
 }

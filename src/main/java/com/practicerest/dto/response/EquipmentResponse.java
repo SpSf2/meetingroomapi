@@ -1,11 +1,19 @@
 package com.practicerest.dto.response;
 
+import com.practicerest.entity.Equipment;
+
 public class EquipmentResponse {
 
     private Long id;
     private String name;
 
     public EquipmentResponse() {
+    }
+
+     // Constructor que acepta la entidad Equipment
+    public EquipmentResponse(Equipment equipment) {
+        this.id = equipment.getId();
+        this.name = equipment.getName();
     }
 
     public Long getId() {
