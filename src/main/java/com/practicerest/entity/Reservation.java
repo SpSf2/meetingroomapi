@@ -34,8 +34,7 @@ public class Reservation {
     inverseJoinColumns = @JoinColumn(name = "equipment_id"))
     private List<Equipment> equipment;
    
-    public Reservation() {
-    }
+    public Reservation() { }
 
     public Reservation(Long id, String roomName, String reservedBy) {
         this.id = id;
@@ -43,41 +42,25 @@ public class Reservation {
         this.reservedBy = reservedBy;
     }
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id;  }
 
-    public String getRoomName() {
-        return roomName;
-    }
+    public String getRoomName() {  return roomName;  }
 
-    public String getReservedBy() {
-        return reservedBy;
-    }
+    public String getReservedBy() {  return reservedBy;  }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public void setId(Long id) {  this.id = id;  }
 
-    public void setRoomName(String roomName) {
-        this.roomName = roomName;
-    }
+    public void setRoomName(String roomName) {  this.roomName = roomName; }
 
-    public void setReservedBy(String reservedBy) {
-        this.reservedBy = reservedBy;
-    }
+    public void setReservedBy(String reservedBy) {  this.reservedBy = reservedBy; }
 
-    public ReservationCategory getCategory() {
-    return category;
-    }
+    public ReservationCategory getCategory() {  return category;  }
 
     public void setCategory(ReservationCategory category) {
         this.category = category;
     }
 
-    public List<Equipment> getEquipment() {
-        return equipment;
-    }
+    public List<Equipment> getEquipment() {  return equipment;  }
 
     public void setEquipment(List<Equipment> equipment) {
         this.equipment = equipment;

@@ -1,6 +1,5 @@
 package com.practicerest.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -9,17 +8,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.practicerest.dto.response.EquipmentResponse;
 import com.practicerest.dto.response.ReservationCategoryResponse;
 import com.practicerest.dto.response.ReservationResponse;
-import com.practicerest.entity.Equipment;
 import com.practicerest.entity.Reservation;
 import com.practicerest.repository.EquipmentRepository;
 import com.practicerest.repository.ReservationCategoryRepository;
 import com.practicerest.repository.ReservationRepository;
-
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ReservationService {

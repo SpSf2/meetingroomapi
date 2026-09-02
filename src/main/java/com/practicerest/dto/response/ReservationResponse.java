@@ -13,44 +13,27 @@ public class ReservationResponse {
     private ReservationCategoryResponse category;
     private List<EquipmentResponse> equipment;
 
-    public ReservationResponse() {
-    }
+    public ReservationResponse() {  }
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
 
-    public String getRoomName() {
-        return roomName;
-    }
+    public String getRoomName() { return roomName; }
 
-    public String getReservedBy() {
-        return reservedBy;
-    }
+    public String getReservedBy() { return reservedBy; }
 
-    public ReservationCategoryResponse getCategory() {
-        return category;
-    }
+    public ReservationCategoryResponse getCategory() { return category; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public void setId(Long id) { this.id = id; }
 
-    public void setRoomName(String roomName) {
-        this.roomName = roomName;
-    }
+    public void setRoomName(String roomName) { this.roomName = roomName; }
 
-    public void setReservedBy(String reservedBy) {
-        this.reservedBy = reservedBy;
-    }
+    public void setReservedBy(String reservedBy) { this.reservedBy = reservedBy; }
 
     public void setCategory(ReservationCategoryResponse category) {
         this.category = category;
     }
 
-    public List<EquipmentResponse> getEquipment() {
-        return equipment;
-    }
+    public List<EquipmentResponse> getEquipment() { return equipment; }
 
     public void setEquipment(List<EquipmentResponse> equipment) {
         this.equipment = equipment;

@@ -22,38 +22,21 @@ public class ReservationRequest {
 
     private List<Long> equipmentIds;
 
-    public ReservationRequest() {
-    }
+    public ReservationRequest() {  }
 
-    public String getRoomName() {
-        return roomName;
-    }
+    public String getRoomName() {  return roomName; }
 
-    public String getReservedBy() {
-        return reservedBy;
-    }
+    public String getReservedBy() { return reservedBy; }
 
-    public Long getCategoryId() {
-        return categoryId;
-    }
+    public Long getCategoryId() { return categoryId; }
 
-    public void setRoomName(String roomName) {
-        this.roomName = roomName;
-    }
+    public void setRoomName(String roomName) { this.roomName = roomName; }
 
-    public void setReservedBy(String reservedBy) {
-        this.reservedBy = reservedBy;
-    }
+    public void setReservedBy(String reservedBy) { this.reservedBy = reservedBy; }
 
-    public void setCategoryId(Long categoryId) {
-        this.categoryId = categoryId;
-    }
+    public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
 
-    public List<Long> getEquipmentIds() {
-    return equipmentIds;
-    }
+    public List<Long> getEquipmentIds() { return equipmentIds; }
 
-    public void setEquipmentIds(List<Long> equipmentIds) {
-        this.equipmentIds = equipmentIds;
-    }
+    public void setEquipmentIds(List<Long> equipmentIds) { this.equipmentIds = equipmentIds; }
 }
