@@ -190,7 +190,9 @@ class ReservationControllerTest {
 
     @Test
     void shouldReturnNotFoundWhenDeletingNonExistingReservation() throws Exception {
-        when(reservationService.deleteReservation(999L)).thenReturn(false);
+        when(reservationService.deleteReservation(999L))
+        .thenThrow(new ResourceNotFoundException(
+                "Reserva no encontrada con id: 999"));
 
         mockMvc.perform(delete("/reservations/999"))
                 .andExpect(status().isNotFound());

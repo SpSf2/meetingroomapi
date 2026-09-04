@@ -104,12 +104,18 @@ public class ReservationService {
     }
 
     //Método modificado para que acepte y elimine una categoría 
+     // CAMBIO 3: lanza excepción si no encuentra la reserva a eliminar
     public boolean deleteReservation(Long id) {
-        if (reservationRepository.existsById(id)) {
-            reservationRepository.deleteById(id);
-            return true;
+
+        if (!reservationRepository.existsById(id)) {
+            throw new ResourceNotFoundException(
+                    "Reserva no encontrada con id: " + id
+            );
         }
-        return false;
+
+        reservationRepository.deleteById(id);
+
+        return true;
     }
 
 

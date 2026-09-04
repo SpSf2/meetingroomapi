@@ -74,27 +74,22 @@ public class ReservationController {
         reservation.setRoomName(request.getRoomName());
         reservation.setReservedBy(request.getReservedBy());
 
-          ReservationResponse response =
-            reservationService.updateReservation(
-                    id,
-                    reservation,
-                    request.getCategoryId(),
-                    request.getEquipmentIds()
+            ReservationResponse response =
+                reservationService.updateReservation(
+                        id,
+                        reservation,
+                        request.getCategoryId(),
+                        request.getEquipmentIds()
             );
 
-    return ResponseEntity.ok(response);
+        return ResponseEntity.ok(response);
     }
 
     //Metodo para eliminar una reserva
-   @DeleteMapping("/reservations/{id}")
+    @DeleteMapping("/reservations/{id}")    
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
-        boolean deleted = reservationService.deleteReservation(id);
-
-        if (deleted) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        reservationService.deleteReservation(id);
+        return ResponseEntity.noContent().build();
     }
 
 }

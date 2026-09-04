@@ -3,6 +3,7 @@ package com.practicerest.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -295,7 +296,7 @@ class ReservationServiceTest {
         assertEquals(2, result.getEquipment().size());
         assertEquals("Pizarra", result.getEquipment().get(0).getName());
         assertEquals("Altavoz", result.getEquipment().get(1).getName());
-        
+
         verify(reservationRepository).findById(400L);
         verify(reservationRepository).save(existingReservation);
     }
@@ -313,13 +314,17 @@ class ReservationServiceTest {
     }
 
     @Test
-    void shouldReturnFalseWhenDeletingNonExistingReservation() {
-        when(reservationRepository.existsById(500L)).thenReturn(false);
+    void shouldThrowExceptionWhenDeletingNonExistingReservation() {
 
-        boolean result = reservationService.deleteReservation(500L);
+        when(reservationRepository.existsById(999L))
+                .thenReturn(false);
 
-        assertEquals(false, result);
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> reservationService.deleteReservation(999L)
+        );
 
-        verify(reservationRepository).existsById(500L);
+        verify(reservationRepository).existsById(999L);
+        verify(reservationRepository, never()).deleteById(999L);
     }
 }
