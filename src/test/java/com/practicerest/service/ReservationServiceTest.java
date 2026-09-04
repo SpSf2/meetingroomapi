@@ -2,6 +2,7 @@ package com.practicerest.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -18,6 +19,7 @@ import com.practicerest.dto.response.ReservationResponse;
 import com.practicerest.entity.Equipment;
 import com.practicerest.entity.Reservation;
 import com.practicerest.entity.ReservationCategory;
+import com.practicerest.exception.ResourceNotFoundException;
 import com.practicerest.repository.EquipmentRepository;
 import com.practicerest.repository.ReservationCategoryRepository;
 import com.practicerest.repository.ReservationRepository;
@@ -127,40 +129,39 @@ class ReservationServiceTest {
         equipment2.setName("Portátil");
 
         Reservation reservation = new Reservation();
-        reservation.setId(200L);
+        reservation.setId(100L);
         reservation.setRoomName("Sala Centro");
         reservation.setReservedBy("Marta");
         reservation.setCategory(category);
         reservation.setEquipment(List.of(equipment1, equipment2));
 
-        when(reservationRepository.findById(200L)).thenReturn(Optional.of(reservation));
+        when(reservationRepository.findById(100L)).thenReturn(Optional.of(reservation));
 
-        Optional<ReservationResponse> result = reservationService.getReservationResponseById(200L);
-
+        ReservationResponse result =
+                reservationService.getReservationResponseById(100L);
         assertNotNull(result);
-        assertEquals(true, result.isPresent());
-        assertEquals(200L, result.get().getId());
-        assertEquals("Sala Centro", result.get().getRoomName());
-        assertEquals("Marta", result.get().getReservedBy());
-        assertNotNull(result.get().getCategory());
-        assertEquals(1L, result.get().getCategory().getId());
-        assertEquals("Reunión", result.get().getCategory().getName());
-        assertNotNull(result.get().getEquipment());
-        assertEquals(2, result.get().getEquipment().size());
-        assertEquals("Proyector", result.get().getEquipment().get(0).getName());
-        assertEquals("Portátil", result.get().getEquipment().get(1).getName());
+        assertEquals(100L, result.getId());
+        assertEquals("Sala Centro", result.getRoomName());
+        assertEquals("Marta", result.getReservedBy());
 
-        verify(reservationRepository).findById(200L);
+        verify(reservationRepository).findById(100L);
     }
 
     @Test
-    void shouldReturnEmptyWhenReservationDoesNotExist() {
-        when(reservationRepository.findById(999L)).thenReturn(Optional.empty());
+    void shouldThrowExceptionWhenReservationDoesNotExist() {
 
-        Optional<ReservationResponse> result = reservationService.getReservationResponseById(999L);
+        when(reservationRepository.findById(999L))
+                .thenReturn(Optional.empty());
 
-        assertNotNull(result);
-        assertEquals(false, result.isPresent());
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class,
+                () -> reservationService.getReservationResponseById(999L)
+        );
+
+        assertEquals(
+                "Reserva no encontrada con id: 999",
+                exception.getMessage()
+        );
 
         verify(reservationRepository).findById(999L);
     }
@@ -200,21 +201,20 @@ class ReservationServiceTest {
         when(equipmentRepository.findAllById(List.of(20L, 21L))).thenReturn(List.of(equipment1, equipment2));
         when(reservationRepository.save(existingReservation)).thenReturn(savedReservation);
 
-        Optional<ReservationResponse> result = reservationService.updateReservation(
+        ReservationResponse result = reservationService.updateReservation(
                 300L, updatedData, 2L, List.of(20L, 21L));
 
         assertNotNull(result);
-        assertEquals(true, result.isPresent());
-        assertEquals(300L, result.get().getId());
-        assertEquals("Sala Nueva", result.get().getRoomName());
-        assertEquals("Lucía", result.get().getReservedBy());
-        assertNotNull(result.get().getCategory());
-        assertEquals(2L, result.get().getCategory().getId());
-        assertEquals("Conferencia", result.get().getCategory().getName());
-        assertNotNull(result.get().getEquipment());
-        assertEquals(2, result.get().getEquipment().size());
-        assertEquals("Pantalla", result.get().getEquipment().get(0).getName());
-        assertEquals("Micrófono", result.get().getEquipment().get(1).getName());
+        assertEquals(300L, result.getId());
+        assertEquals("Sala Nueva", result.getRoomName());
+        assertEquals("Lucía", result.getReservedBy());
+        assertNotNull(result.getCategory());
+        assertEquals(2L, result.getCategory().getId());
+        assertEquals("Conferencia", result.getCategory().getName());
+        assertNotNull(result.getEquipment());
+        assertEquals(2, result.getEquipment().size());
+        assertEquals("Pantalla", result.getEquipment().get(0).getName());
+        assertEquals("Micrófono", result.getEquipment().get(1).getName());
 
         verify(reservationRepository).findById(300L);
         verify(reservationCategoryRepository).findById(2L);
@@ -223,18 +223,24 @@ class ReservationServiceTest {
     }
 
     @Test
-    void shouldReturnEmptyWhenUpdatingNonExistingReservation() {
+    void shouldThrowExceptionWhenUpdatingNonExistingReservation() {
+
         Reservation updatedData = new Reservation();
         updatedData.setRoomName("Sala Nueva");
         updatedData.setReservedBy("Lucía");
 
-        when(reservationRepository.findById(300L)).thenReturn(Optional.empty());
+        when(reservationRepository.findById(300L))
+                .thenReturn(Optional.empty());
 
-        Optional<ReservationResponse> result = reservationService.updateReservation(
-                300L, updatedData, 2L, List.of(20L, 21L));
-
-        assertNotNull(result);
-        assertEquals(false, result.isPresent());
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> reservationService.updateReservation(
+                        300L,
+                        updatedData,
+                        2L,
+                        List.of(20L, 21L)
+                )
+        );
 
         verify(reservationRepository).findById(300L);
     }
@@ -275,22 +281,21 @@ class ReservationServiceTest {
         when(reservationRepository.findById(400L)).thenReturn(Optional.of(existingReservation));
         when(reservationRepository.save(existingReservation)).thenReturn(savedReservation);
 
-        Optional<ReservationResponse> result = reservationService.updateReservation(
+        ReservationResponse result = reservationService.updateReservation(
                 400L, updatedData, null, List.of());
 
         assertNotNull(result);
-        assertEquals(true, result.isPresent());
-        assertEquals(400L, result.get().getId());
-        assertEquals("Sala Editada", result.get().getRoomName());
-        assertEquals("Pedro Actualizado", result.get().getReservedBy());
-        assertNotNull(result.get().getCategory());
-        assertEquals(3L, result.get().getCategory().getId());
-        assertEquals("Formación", result.get().getCategory().getName());
-        assertNotNull(result.get().getEquipment());
-        assertEquals(2, result.get().getEquipment().size());
-        assertEquals("Pizarra", result.get().getEquipment().get(0).getName());
-        assertEquals("Altavoz", result.get().getEquipment().get(1).getName());
-
+        assertEquals(400L, result.getId());
+        assertEquals("Sala Editada", result.getRoomName());
+        assertEquals("Pedro Actualizado", result.getReservedBy());
+        assertNotNull(result.getCategory());
+        assertEquals(3L, result.getCategory().getId());
+        assertEquals("Formación", result.getCategory().getName());
+        assertNotNull(result.getEquipment());
+        assertEquals(2, result.getEquipment().size());
+        assertEquals("Pizarra", result.getEquipment().get(0).getName());
+        assertEquals("Altavoz", result.getEquipment().get(1).getName());
+        
         verify(reservationRepository).findById(400L);
         verify(reservationRepository).save(existingReservation);
     }

@@ -48,9 +48,8 @@ public class ReservationController {
     @GetMapping("/reservations/{id}")
     public ResponseEntity<ReservationResponse> getReservationById
                                         (@PathVariable Long id) {
-        return reservationService.getReservationResponseById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        ReservationResponse response =  reservationService.getReservationResponseById(id);
+        return ResponseEntity.ok(response);
     }
 
     //Metodo para crear una reserva(se agregó Response)
@@ -75,10 +74,15 @@ public class ReservationController {
         reservation.setRoomName(request.getRoomName());
         reservation.setReservedBy(request.getReservedBy());
 
-        return reservationService.updateReservation(id, reservation, 
-                    request.getCategoryId(), request.getEquipmentIds())
-                                .map(ResponseEntity::ok)
-                                .orElse(ResponseEntity.notFound().build());
+          ReservationResponse response =
+            reservationService.updateReservation(
+                    id,
+                    reservation,
+                    request.getCategoryId(),
+                    request.getEquipmentIds()
+            );
+
+    return ResponseEntity.ok(response);
     }
 
     //Metodo para eliminar una reserva

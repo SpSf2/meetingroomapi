@@ -12,21 +12,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import tools.jackson.databind.ObjectMapper;
 import com.practicerest.dto.request.ReservationRequest;
 import com.practicerest.dto.response.EquipmentResponse;
 import com.practicerest.dto.response.ReservationCategoryResponse;
 import com.practicerest.dto.response.ReservationResponse;
+import com.practicerest.exception.ResourceNotFoundException;
 import com.practicerest.service.ReservationService;
+
+import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(ReservationController.class)
 class ReservationControllerTest {
@@ -58,7 +59,7 @@ class ReservationControllerTest {
         response.setEquipment(List.of(equipment));
 
         when(reservationService.getReservationResponseById(100L))
-                .thenReturn(Optional.of(response));
+                .thenReturn(response);
 
         mockMvc.perform(get("/reservations/100"))
                 .andExpect(status().isOk())
@@ -75,7 +76,8 @@ class ReservationControllerTest {
     @Test
     void shouldReturnNotFoundWhenReservationDoesNotExist() throws Exception {
         when(reservationService.getReservationResponseById(999L))
-                .thenReturn(Optional.empty());
+        .thenThrow(new ResourceNotFoundException(
+                "Reserva no encontrada con id: 999"));
 
         mockMvc.perform(get("/reservations/999"))
                 .andExpect(status().isNotFound());
@@ -146,7 +148,7 @@ class ReservationControllerTest {
         response.setEquipment(List.of(equipment));
 
         when(reservationService.updateReservation(eq(200L), any(), eq(2L), eq(List.of(20L))))
-                .thenReturn(Optional.of(response));
+                .thenReturn(response);
 
         mockMvc.perform(put("/reservations/200")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -168,7 +170,9 @@ class ReservationControllerTest {
         request.setEquipmentIds(List.of(20L));
 
         when(reservationService.updateReservation(eq(999L), any(), eq(2L), eq(List.of(20L))))
-                .thenReturn(Optional.empty());
+                .thenThrow(new ResourceNotFoundException(
+        "Reserva no encontrada con id: 999"
+        ));
 
         mockMvc.perform(put("/reservations/999")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -253,8 +257,8 @@ class ReservationControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.roomName").value("Room name must be between 2 and 50 characters"))
-                .andExpect(jsonPath("$.reservedBy").value("Reserved by must contain only letters and spaces"));
+                .andExpect(jsonPath("$.errors.roomName").value("Room name must be between 2 and 50 characters"))
+                .andExpect(jsonPath("$.errors.reservedBy").value("Reserved by must contain only letters and spaces"));
     }
 
     @Test
@@ -269,8 +273,8 @@ class ReservationControllerTest {
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.roomName").value("Room name must be between 2 and 50 characters"))
-        .andExpect(jsonPath("$.reservedBy").value("Reserved by must contain only letters and spaces"));
+        .andExpect(jsonPath("$.errors.roomName").value("Room name must be between 2 and 50 characters"))
+        .andExpect(jsonPath("$.errors.reservedBy").value("Reserved by must contain only letters and spaces"));
     }
 
 }

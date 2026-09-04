@@ -1,7 +1,6 @@
 package com.practicerest.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,6 +13,7 @@ import com.practicerest.dto.response.EquipmentResponse;
 import com.practicerest.dto.response.ReservationCategoryResponse;
 import com.practicerest.dto.response.ReservationResponse;
 import com.practicerest.entity.Reservation;
+import com.practicerest.exception.ResourceNotFoundException;
 import com.practicerest.repository.EquipmentRepository;
 import com.practicerest.repository.ReservationCategoryRepository;
 import com.practicerest.repository.ReservationRepository;
@@ -55,10 +55,13 @@ public class ReservationService {
     }
 
     //Método para buscar una Reservation por id
+    // CAMBIO 1: ya no devuelve Optional, lanza excepción si no encuentra id
     @Transactional(readOnly = true)
-    public Optional<ReservationResponse> getReservationResponseById(Long id) {
+    public ReservationResponse getReservationResponseById(Long id) {
         return reservationRepository.findById(id)
-                                    .map(this::mapToResponse);
+                                    .map(this::mapToResponse)
+                                    .orElseThrow(() -> new ResourceNotFoundException
+                                           ("Reserva no encontrada con id: " + id));
     }
     
     //Método modificado para que acepte y cree una categoría con Dto
@@ -77,7 +80,8 @@ public class ReservationService {
     }
 
     //Método modificado para que acepte y actualice una categoría con Dto
-    public Optional<ReservationResponse> updateReservation(Long id, 
+     // CAMBIO 2: ya no devuelve Optional, lanza excepción si no encuentra id
+    public ReservationResponse updateReservation(Long id, 
         Reservation reservation, Long categoryId, List<Long> equipmentIds) {
 
         return reservationRepository.findById(id)
@@ -95,7 +99,8 @@ public class ReservationService {
 
             return reservationRepository.save(existingReservation);
         })
-        .map(this::mapToResponse);
+        .map(this::mapToResponse)
+        .orElseThrow(() -> new ResourceNotFoundException("Reserva no encontrada con id: " + id));
     }
 
     //Método modificado para que acepte y elimine una categoría 
