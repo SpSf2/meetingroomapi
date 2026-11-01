@@ -81,4 +81,17 @@ public class GlobalExceptionHandler {
         
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
+
+    // 6. Manejo de BadRequestException personalizada
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<Map<String, Object>> handleBadRequestException(BadRequestException ex) {
+        Map<String, Object> error = new HashMap<>();
+        
+        error.put("timestamp", LocalDateTime.now());
+        error.put("status", 400);
+        error.put("message", "Solicitud incorrecta");
+        error.put("details", ex.getMessage());
+        
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
 }

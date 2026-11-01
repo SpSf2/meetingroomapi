@@ -38,4 +38,8 @@ public class ReservationCategory {
     public void setId(Long id) {  this.id = id;  }
 
     public void setName(String name) {  this.name = name; }
+
+    public List<Reservation> getReservations() { return reservations; }
+
+    public void setReservations(List<Reservation> reservations) { this.reservations = reservations; }
 }

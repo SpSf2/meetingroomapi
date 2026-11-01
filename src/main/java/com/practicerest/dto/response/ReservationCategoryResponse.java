@@ -1,26 +1,21 @@
 package com.practicerest.dto.response;
+public class ReservationCategoryResponse{
 
-public class ReservationCategoryResponse {
+    Long id;
+    String name;
 
-    private Long id;
-    private String name;
+    public ReservationCategoryResponse() { }
 
-    public ReservationCategoryResponse() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setId(Long id) {
+    public ReservationCategoryResponse(Long id, String name) {
         this.id = id;
-    }
-
-    public void setName(String name) {
         this.name = name;
     }
+
+    public Long getId() { return id; }
+
+    public String getName() { return name; }
+
+    public void setId(Long id) { this.id = id; }
+
+    public void setName(String name) { this.name = name; }
 }

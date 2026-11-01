@@ -2,8 +2,11 @@ package com.practicerest.dto.request;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 @Schema(name = "ReservationRequest", 
@@ -25,6 +28,8 @@ public class ReservationRequest {
     private String reservedBy;
 
     @Schema(description = "ID de la categoría de la reserva", example = "1")
+    @NotNull(message = "Category is required")
+    @JsonProperty("categoryId") // <-- Fuerza a Jackson a mapearlo correctamente
     private Long categoryId;
 
     @Schema(description = "Lista de IDs de equipos solicitados", example = "[10, 11]")

@@ -2,6 +2,8 @@ package com.practicerest.service;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -12,7 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.practicerest.dto.response.EquipmentResponse;
 import com.practicerest.dto.response.ReservationCategoryResponse;
 import com.practicerest.dto.response.ReservationResponse;
+import com.practicerest.entity.Equipment;
 import com.practicerest.entity.Reservation;
+import com.practicerest.entity.ReservationCategory;
 import com.practicerest.exception.ResourceNotFoundException;
 import com.practicerest.repository.EquipmentRepository;
 import com.practicerest.repository.ReservationCategoryRepository;
@@ -20,6 +24,9 @@ import com.practicerest.repository.ReservationRepository;
 
 @Service
 public class ReservationService {
+
+    // Instanciamos el Logger profesional para la clase
+    private static final Logger log = LoggerFactory.getLogger(ReservationService.class);
 
     /* Se modifica todo el service con metodos similares a los anteriores, que cumplen
     la misma función, pero que usen el repositorio de la entidad Reservation */
@@ -67,12 +74,31 @@ public class ReservationService {
     //Método modificado para que acepte y cree una categoría con Dto
     public ReservationResponse createReservation(Reservation reservation,
                             Long categoryId, List<Long> equipmentIds) {
-        if (categoryId != null) {
-            reservationCategoryRepository.findById(categoryId)
-                                        .ifPresent(reservation::setCategory);
+
+        // 1. Categoría obligatoria y validación de existencia                    
+        if (categoryId == null) {
+            throw new IllegalArgumentException("El ID de la categoría es obligatorio");
         }
-        if (equipmentIds != null && !equipmentIds.isEmpty()) {
-            reservation.setEquipment(equipmentRepository.findAllById(equipmentIds));
+            ReservationCategory category = reservationCategoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new ResourceNotFoundException
+                                ("Categoría no encontrada con id: " + categoryId));
+            reservation.setCategory(category);
+        
+        // 2. Equipos opcionales con recordatorio/recomendación
+        if (equipmentIds == null || equipmentIds.isEmpty()) {
+
+            // Métrica de negocio: Registramos cuando una reserva se crea sin equipos
+            log.info("Métrica de negocio: La reserva para la sala '{}' por '{}' se creó sin equipos solicitados.", 
+                    reservation.getRoomName(), reservation.getReservedBy());
+        } else {
+            List<Equipment> equipmentList = equipmentRepository.findAllById(equipmentIds);
+           
+            // Validamos que todos los equipos solicitados existan
+            if (equipmentList.size() != equipmentIds.size()) {
+                throw new ResourceNotFoundException
+                            ("Uno o más equipos especificados no fueron encontrados");
+            }
+            reservation.setEquipment(equipmentList);
         }
 
         Reservation savedReservation = reservationRepository.save(reservation);
@@ -89,12 +115,29 @@ public class ReservationService {
             existingReservation.setRoomName(reservation.getRoomName());
             existingReservation.setReservedBy(reservation.getReservedBy());
 
-            if (categoryId != null) {
-                reservationCategoryRepository.findById(categoryId)
-                                             .ifPresent(existingReservation::setCategory);
+            // 1. Categoría obligatoria y validación de existencia                    
+            if (categoryId == null) {
+                throw new IllegalArgumentException("El ID de la categoría es obligatorio");
             }
-            if (equipmentIds != null && !equipmentIds.isEmpty()) {
-                existingReservation.setEquipment(equipmentRepository.findAllById(equipmentIds));
+            ReservationCategory category = reservationCategoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new ResourceNotFoundException
+                            ("Categoría no encontrada con id: " + categoryId));
+            existingReservation.setCategory(category);
+                                    
+            // 2. Equipos opcionales con recordatorio/recomendación
+            if (equipmentIds == null || equipmentIds.isEmpty()) {
+
+                // Métrica de negocio: Registramos cuando una reserva se Actualiza sin equipos
+            log.info("Métrica de negocio: La reserva para la sala '{}' por '{}' " + 
+                        " se modificó sin equipos solicitados.", 
+                            reservation.getRoomName(), reservation.getReservedBy());
+            } else {
+                List<Equipment> equipmentList = equipmentRepository.findAllById(equipmentIds);
+                if (equipmentList.size() != equipmentIds.size()) {
+                    throw new ResourceNotFoundException
+                            ("Uno o más equipos especificados no fueron encontrados");
+                }
+                existingReservation.setEquipment(equipmentList);
             }
 
             return reservationRepository.save(existingReservation);
