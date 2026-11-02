@@ -6,11 +6,30 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 @Schema(description = "DTO para crear o actualizar una categoría de reserva")
-public record CategoryRequest(
+public class CategoryRequest {
+
     @Schema(description = "Nombre de la categoría", example = "Reuniones Ejecutivas")
     @NotBlank(message = "El nombre de la categoría es obligatorio")
-    @Size(min = 2, max = 50, message = "Category name must be between 2 and 50 characters")
+    @Size(min = 3, max = 50, message = "El nombre debe tener entre 3 y 50 caracteres")
     @Pattern(regexp = "^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$",
-                 message = "Category name must contain only letters and spaces")
-    String name
-) {}
+                  message = "Category name must contain only letters and spaces")
+    private String name;
+
+    // Constructor vacío (necesario para la deserialización de JSON)
+    public CategoryRequest() {
+    }
+
+    // Constructor con parámetros (opcional)
+    public CategoryRequest(String name) {
+        this.name = name;
+    }
+
+    // Getters y Setters
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+}

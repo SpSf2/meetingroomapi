@@ -43,7 +43,7 @@ public class ReservationCategoryService {
     public ReservationCategoryResponse createCategory(CategoryRequest request) {
         ReservationCategory category = new ReservationCategory();
         // Asumiendo que CategoryRequest tiene un método getName() o que es un record con name()
-        category.setName(request.name()); 
+        category.setName(request.getName()); 
 
         ReservationCategory savedCategory = categoryRepository.save(category);
         return mapToResponse(savedCategory);
@@ -54,7 +54,7 @@ public class ReservationCategoryService {
         ReservationCategory category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada con ID: " + id));
         
-        category.setName(request.name());
+        category.setName(request.getName());
         ReservationCategory updatedCategory = categoryRepository.save(category);
         
         return mapToResponse(updatedCategory);

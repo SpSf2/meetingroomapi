@@ -1,6 +1,6 @@
 # Meeting Room API
 
-API REST para la gestión de reservas de salas de reuniones, construida con **Spring Boot 4**, **Spring Data JPA** y **MySQL**. Permite crear, consultar, actualizar y eliminar reservas y categorías, asociando cada reserva a una categoría y a un conjunto de equipos. Incluye validación de datos, manejo global de errores, paginación y documentación interactiva con Swagger/OpenAPI.
+API REST para la gestión de reservas de salas de reuniones, construida con **Spring Boot 4**, **Spring Data JPA** y **MySQL**. Permite crear, consultar, actualizar y eliminar reservas, categorías y equipos, asociando cada reserva a una categoría y a un conjunto de equipos. Incluye validación de datos, manejo global de errores, paginación y documentación interactiva con Swagger/OpenAPI.
 
 ---
 
@@ -15,6 +15,7 @@ API REST para la gestión de reservas de salas de reuniones, construida con **Sp
 - [Cómo ejecutar](#cómo-ejecutar)
 - [Endpoints de la API](#endpoints-de-la-api)
 - [Endpoints de categorías](#endpoints-de-categorías)
+- [Endpoints de equipos](#endpoints-de-equipos)
 - [Ejemplos de uso](#ejemplos-de-uso)
 - [Paginación y ordenamiento](#paginación-y-ordenamiento)
 - [Manejo de errores](#manejo-de-errores)
@@ -29,10 +30,11 @@ API REST para la gestión de reservas de salas de reuniones, construida con **Sp
 
 - CRUD completo de reservas (`GET`, `POST`, `PUT`, `DELETE`).
 - CRUD completo de categorías de reserva (`GET`, `POST`, `PUT`, `DELETE`).
+- CRUD completo de equipos (`GET`, `POST`, `PUT`, `DELETE`), incluyendo nombre y descripción.
 - Listado de reservas paginado con ordenamiento configurable por cualquier campo.
 - Asociación de reservas con una **categoría** obligatoria y varios **equipos** opcionales mediante relaciones JPA.
 - Validación de existencia de la categoría y de todos los equipos enviados en la reserva.
-- Protección al eliminar categorías: no se permite borrar una categoría con reservas asociadas.
+- Protección al eliminar categorías y equipos: no se permite borrarlos si tienen reservas asociadas.
 - DTOs de entrada y salida para desacoplar la API del modelo de persistencia.
 - Validación de datos con Jakarta Bean Validation (`@Valid`).
 - Manejo centralizado de excepciones con respuestas JSON consistentes.
@@ -69,11 +71,11 @@ Controller  →  Service  →  Repository  →  Base de datos
    DTOs      Entidades JPA
 ```
 
-- **Controller**: expone los endpoints REST y valida la entrada (`ReservationController` y `ReservationCategoryController`).
-- **Service**: contiene la lógica de negocio y la conversión entidad → DTO (`ReservationService` y `ReservationCategoryService`).
+- **Controller**: expone los endpoints REST y valida la entrada (`ReservationController`, `ReservationCategoryController` y `EquipmentController`).
+- **Service**: contiene la lógica de negocio y la conversión entidad → DTO (`ReservationService`, `ReservationCategoryService` y `EquipmentService`).
 - **Repository**: interfaces de Spring Data JPA para el acceso a datos.
 - **Entity**: modelo de persistencia (`Reservation`, `ReservationCategory`, `Equipment`).
-- **DTO**: contratos de entrada (`ReservationRequest`, `CategoryRequest`) y salida (`ReservationResponse`, `ReservationCategoryResponse`, `EquipmentResponse`).
+- **DTO**: contratos de entrada (`ReservationRequest`, `CategoryRequest`, `EquipmentRequest`) y salida (`ReservationResponse`, `ReservationCategoryResponse`, `EquipmentResponse`).
 - **Exception**: excepción personalizada, excepción de solicitud incorrecta y manejador global de errores.
 
 ---
@@ -94,7 +96,7 @@ ReservationCategory (1) ──── (N) Reservation (N) ──── (N) Equipm
   - `id`, `name`
   - `reservations` (`OneToMany` → `Reservation`)
 - **Equipment**
-  - `id`, `name`
+  - `id`, `name`, `description`
   - `reservations` (`ManyToMany` mapeado por `Reservation.equipment`)
 
 > El esquema se crea/actualiza automáticamente gracias a `spring.jpa.hibernate.ddl-auto=update`.
@@ -206,13 +208,21 @@ La aplicación se inicia por defecto en `http://localhost:8080`.
     "name": "Reunión"
   },
   "equipment": [
-    { "id": 10, "name": "Proyector" },
-    { "id": 11, "name": "Portátil" }
+    {
+      "id": 10,
+      "name": "Proyector",
+      "description": "Proyector de alta resolución"
+    },
+    {
+      "id": 11,
+      "name": "Portátil",
+      "description": "Portátil para presentaciones"
+    }
   ]
 }
 ```
 
-> Si la categoría o alguno de los equipos indicados no existe, la API devuelve `404 Not Found`. Los equipos deben existir previamente en la base de datos (tabla `equipment`), ya que todavía no se gestionan desde la API.
+> Si la categoría o alguno de los equipos indicados no existe, la API devuelve `404 Not Found`. Los equipos pueden gestionarse mediante los endpoints de `/equipments` y deben existir antes de asociarlos a una reserva.
 
 ---
 
@@ -236,7 +246,7 @@ La aplicación se inicia por defecto en `http://localhost:8080`.
 
 | Campo  | Tipo   | Reglas                                                       |
 |--------|--------|--------------------------------------------------------------|
-| `name` | String | Obligatorio, entre 2 y 50 caracteres, solo letras y espacios |
+| `name` | String | Obligatorio, entre 3 y 50 caracteres, solo letras y espacios |
 
 ### Respuesta (`ReservationCategoryResponse`)
 
@@ -248,6 +258,44 @@ La aplicación se inicia por defecto en `http://localhost:8080`.
 ```
 
 > `DELETE /categories/{id}` devuelve `400 Bad Request` si la categoría tiene reservas asociadas.
+
+---
+
+## Endpoints de equipos
+
+| Método   | Ruta               | Descripción                              | Código de éxito  |
+|----------|--------------------|------------------------------------------|------------------|
+| `GET`    | `/equipments`      | Lista todos los equipos                  | `200 OK`         |
+| `GET`    | `/equipments/{id}` | Obtiene un equipo por ID                 | `200 OK`         |
+| `POST`   | `/equipments`      | Crea un nuevo equipo                     | `201 Created`    |
+| `PUT`    | `/equipments/{id}` | Actualiza un equipo existente            | `200 OK`         |
+| `DELETE` | `/equipments/{id}` | Elimina un equipo sin reservas asociadas | `204 No Content` |
+
+### Cuerpo de la petición (`EquipmentRequest`)
+
+```json
+{
+  "name": "Proyector HD",
+  "description": "Proyector de alta resolución"
+}
+```
+
+| Campo         | Tipo   | Reglas                                                                |
+|---------------|--------|-----------------------------------------------------------------------|
+| `name`        | String | Obligatorio, entre 2 y 50 caracteres, solo letras, números y espacios |
+| `description` | String | Obligatorio, máximo 200 caracteres                                    |
+
+### Respuesta (`EquipmentResponse`)
+
+```json
+{
+  "id": 10,
+  "name": "Proyector HD",
+  "description": "Proyector de alta resolución"
+}
+```
+
+> `DELETE /equipments/{id}` devuelve `400 Bad Request` si el equipo está asociado a una o más reservas.
 
 ---
 
@@ -319,6 +367,29 @@ curl http://localhost:8080/categories
 curl -X DELETE http://localhost:8080/categories/3
 ```
 
+**Crear un equipo**
+
+```bash
+curl -X POST http://localhost:8080/equipments \
+  -H "Content-Type: application/json" \
+  -d '{
+        "name": "Proyector HD",
+        "description": "Proyector de alta resolución"
+      }'
+```
+
+**Listar equipos**
+
+```bash
+curl http://localhost:8080/equipments
+```
+
+**Eliminar un equipo**
+
+```bash
+curl -X DELETE http://localhost:8080/equipments/10
+```
+
 ---
 
 ## Paginación y ordenamiento
@@ -354,15 +425,15 @@ La respuesta sigue el formato `Page` de Spring Data:
 
 Todas las excepciones se gestionan en `GlobalExceptionHandler` y devuelven JSON con `timestamp`, `status` y `message`.
 
-| Situación                        | Código | Respuesta                                  |
-|----------------------------------|--------|--------------------------------------------|
-| Validación fallida (`@Valid`)    | `400`  | `message` + mapa `errors` por campo        |
-| Recurso no encontrado            | `404`  | Mensaje de la excepción                    |
-| Categoría o equipo inexistente   | `404`  | Mensaje indicando el recurso no encontrado |
-| Categoría con reservas asociadas | `400`  | `message` + `details` con el motivo        |
-| Tipo de parámetro incorrecto     | `400`  | Detalle del error de tipo                  |
-| Error de base de datos           | `500`  | Mensaje + causa específica                 |
-| Excepción no controlada          | `500`  | `Error interno del servidor` + detalle     |
+| Situación                                 | Código | Respuesta                                  |
+|-------------------------------------------|--------|--------------------------------------------|
+| Validación fallida (`@Valid`)             | `400`  | `message` + mapa `errors` por campo        |
+| Recurso no encontrado                     | `404`  | Mensaje de la excepción                    |
+| Categoría o equipo inexistente            | `404`  | Mensaje indicando el recurso no encontrado |
+| Categoría o equipo con reservas asociadas | `400`  | `message` + `details` con el motivo        |
+| Tipo de parámetro incorrecto              | `400`  | Detalle del error de tipo                  |
+| Error de base de datos                    | `500`  | Mensaje + causa específica                 |
+| Excepción no controlada                   | `500`  | `Error interno del servidor` + detalle     |
 
 Ejemplo de error de validación:
 
@@ -379,7 +450,7 @@ Ejemplo de error de validación:
 }
 ```
 
-Ejemplo al intentar eliminar una categoría con reservas:
+Ejemplo al intentar eliminar una categoría o un equipo con reservas asociadas:
 
 ```json
 {
@@ -390,6 +461,8 @@ Ejemplo al intentar eliminar una categoría con reservas:
 }
 ```
 
+> En el caso de un equipo, `details` indica: `No se puede eliminar el equipo porque está asociado a una o más reservas.`
+
 ---
 
 ## Documentación interactiva (Swagger)
@@ -399,7 +472,7 @@ Con la aplicación en ejecución:
 - **Swagger UI:** <http://localhost:8080/swagger-ui.html>
 - **OpenAPI JSON:** <http://localhost:8080/v3/api-docs>
 
-La información general de la API (título, versión, descripción y contacto) se define en `OpenApiConfig`. Los endpoints aparecen agrupados en las etiquetas **Reservations** y **Categorías de Reserva**.
+La información general de la API (título, versión, descripción y contacto) se define en `OpenApiConfig`. Los endpoints aparecen agrupados en las etiquetas **Reservations**, **Categorías de Reserva** y **Equipos**.
 
 ---
 
@@ -432,11 +505,13 @@ meetingroomapi/
     │   │   │   └── OpenApiConfig.java
     │   │   ├── controller/
     │   │   │   ├── ReservationController.java
-    │   │   │   └── ReservationCategoryController.java
+    │   │   │   ├── ReservationCategoryController.java
+    │   │   │   └── EquipmentController.java
     │   │   ├── dto/
     │   │   │   ├── request/
     │   │   │   │   ├── ReservationRequest.java
-    │   │   │   │   └── CategoryRequest.java
+    │   │   │   │   ├── CategoryRequest.java
+    │   │   │   │   └── EquipmentRequest.java
     │   │   │   └── response/
     │   │   │       ├── ReservationResponse.java
     │   │   │       ├── ReservationCategoryResponse.java
@@ -455,7 +530,8 @@ meetingroomapi/
     │   │   │   └── EquipmentRepository.java
     │   │   └── service/
     │   │       ├── ReservationService.java
-    │   │       └── ReservationCategoryService.java
+    │   │       ├── ReservationCategoryService.java
+    │   │       └── EquipmentService.java
     │   └── resources/
     │       └── application.properties
     └── test/java/com/practicerest/
@@ -468,9 +544,8 @@ meetingroomapi/
 
 ## Posibles mejoras
 
-- Añadir controladores y servicios para gestionar equipos.
-- Añadir pruebas unitarias y de integración para `ReservationCategoryService`.
-- Incorporar paginación al listado de categorías.
+- Añadir pruebas unitarias y de integración para `ReservationCategoryService` y `EquipmentService`.
+- Incorporar paginación a los listados de categorías y equipos.
 - Incorporar un perfil `dev`/`prod` y externalizar credenciales.
 - Añadir migraciones versionadas con Flyway o Liquibase.
 - Incluir un `Dockerfile` y `docker-compose` con MySQL para facilitar el arranque.
