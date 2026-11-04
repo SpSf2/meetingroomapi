@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  # 1. Servicio de Base de Datos MySQL
+  mysql-db:
+    image: mysql:8.4
+    container_name: mysql-meetingroom
+    environment:
+      MYSQL_DATABASE: meetingroomdb
+      MYSQL_ROOT_PASSWORD: Temp2026
+    ports:
+      - "127.0.0.1:3308:3306" # <-- Cambiado para escuchar únicamente en localhost
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - app-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pTemp2026"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # 2. Servicio de tu Aplicación Spring Boot
+  app:
+    build: .
+    container_name: meetingroom-app
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/meetingroomdb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=Temp2026
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    networks:
+      - app-net
+
+volumes:
+  mysql_data:
+
+networks:
+  app-net:
+    driver: bridge

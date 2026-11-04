@@ -71,7 +71,7 @@ public class ReservationService {
                                            ("Reserva no encontrada con id: " + id));
     }
     
-    //Método modificado para que acepte y cree una categoría con Dto
+    //Método modificado para que acepte y cree una Reserva con categoría y equipos(opcional)
     public ReservationResponse createReservation(Reservation reservation,
                             Long categoryId, List<Long> equipmentIds) {
 
@@ -105,7 +105,7 @@ public class ReservationService {
         return mapToResponse(savedReservation);
     }
 
-    //Método modificado para que acepte y actualice una categoría con Dto
+    //Método modificado para que acepte y actualice una Reserva con Dto
      // CAMBIO 2: ya no devuelve Optional, lanza excepción si no encuentra id
     public ReservationResponse updateReservation(Long id, 
         Reservation reservation, Long categoryId, List<Long> equipmentIds) {
@@ -115,14 +115,14 @@ public class ReservationService {
             existingReservation.setRoomName(reservation.getRoomName());
             existingReservation.setReservedBy(reservation.getReservedBy());
 
-            // 1. Categoría obligatoria y validación de existencia                    
-            if (categoryId == null) {
-                throw new IllegalArgumentException("El ID de la categoría es obligatorio");
+            // 1. Categoría: si se proporciona un ID, se valida y se actualiza; 
+            // si es null, se mantiene la categoría que ya tenía la reserva.
+            if (categoryId != null) {
+                ReservationCategory category = reservationCategoryRepository.findById(categoryId)
+                        .orElseThrow(() -> new ResourceNotFoundException
+                                ("Categoría no encontrada con id: " + categoryId));
+                existingReservation.setCategory(category);
             }
-            ReservationCategory category = reservationCategoryRepository.findById(categoryId)
-                    .orElseThrow(() -> new ResourceNotFoundException
-                            ("Categoría no encontrada con id: " + categoryId));
-            existingReservation.setCategory(category);
                                     
             // 2. Equipos opcionales con recordatorio/recomendación
             if (equipmentIds == null || equipmentIds.isEmpty()) {

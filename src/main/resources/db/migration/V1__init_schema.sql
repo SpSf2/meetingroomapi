@@ -1,5 +1,5 @@
 -- 1. Crear tabla de Categorías
-CREATE TABLE category (
+CREATE TABLE reservation_category (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL
 );
@@ -17,7 +17,7 @@ CREATE TABLE reservation (
     room_name VARCHAR(100) NOT NULL,
     reserved_by VARCHAR(100) NOT NULL,
     category_id BIGINT,
-    CONSTRAINT fk_reservation_category FOREIGN KEY (category_id) REFERENCES category(id)
+    CONSTRAINT fk_reservation_category FOREIGN KEY (category_id) REFERENCES reservation_category(id)
 );
 
 -- 4. Crear tabla intermedia para la relación Many-to-Many entre Reservation y Equipment

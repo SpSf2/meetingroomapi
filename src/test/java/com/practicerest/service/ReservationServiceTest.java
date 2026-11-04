@@ -3,6 +3,7 @@ package com.practicerest.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -91,28 +92,23 @@ class ReservationServiceTest {
     }
 
     @Test
-    void shouldCreateReservationWithoutCategoryAndEquipment() {
+    void shouldThrowExceptionWhenCategoryDoesNotExistOnCreate() {
         Reservation reservation = new Reservation();
         reservation.setRoomName("Sala Sur");
         reservation.setReservedBy("Luis");
 
-        Reservation savedReservation = new Reservation();
-        savedReservation.setId(101L);
-        savedReservation.setRoomName("Sala Sur");
-        savedReservation.setReservedBy("Luis");
+        // Simulamos que la categoría 99L no existe en la base de datos
+        when(reservationCategoryRepository.findById(99L)).thenReturn(Optional.empty());
 
-        when(reservationRepository.save(reservation)).thenReturn(savedReservation);
+        // Verificamos que al intentar crear la reserva lance la excepción ResourceNotFoundException
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> reservationService.createReservation(reservation, 99L, null)
+        );
 
-        ReservationResponse result = reservationService.createReservation(reservation, null, null);
-
-        assertNotNull(result);
-        assertEquals(101L, result.getId());
-        assertEquals("Sala Sur", result.getRoomName());
-        assertEquals("Luis", result.getReservedBy());
-        assertEquals(null, result.getCategory());
-        assertEquals(null, result.getEquipment());
-
-        verify(reservationRepository).save(reservation);
+        // Verificamos que se intentó buscar la categoría pero nunca se guardó la reserva
+        verify(reservationCategoryRepository).findById(99L);
+        verify(reservationRepository, never()).save(any());
     }
 
     @Test
