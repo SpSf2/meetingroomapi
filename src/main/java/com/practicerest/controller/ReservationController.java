@@ -82,6 +82,8 @@ public class ReservationController {
         Reservation reservation = new Reservation();
         reservation.setRoomName(request.getRoomName());
         reservation.setReservedBy(request.getReservedBy());
+        reservation.setStartTime(request.getStartTime()); // <-- ¡Asegúrate de incluir esto!
+        reservation.setEndTime(request.getEndTime());     // <-- ¡Y esto!
         
         ReservationResponse createdReservation = reservationService.createReservation(reservation,
                                             request.getCategoryId(), request.getEquipmentIds());
@@ -98,6 +100,8 @@ public class ReservationController {
         Reservation reservation = new Reservation();
         reservation.setRoomName(request.getRoomName());
         reservation.setReservedBy(request.getReservedBy());
+        reservation.setStartTime(request.getStartTime()); // <-- ¡Asegúrate de incluir esto!
+        reservation.setEndTime(request.getEndTime());     // <-- ¡Y esto!
 
             ReservationResponse response =
                 reservationService.updateReservation(

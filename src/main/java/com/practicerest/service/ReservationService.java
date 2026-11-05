@@ -74,6 +74,27 @@ public class ReservationService {
     //Método modificado para que acepte y cree una Reserva con categoría y equipos(opcional)
     public ReservationResponse createReservation(Reservation reservation,
                             Long categoryId, List<Long> equipmentIds) {
+        
+        // --- 0. VALIDACIONES DE FECHAS Y SOLAPAMIENTO ---
+        if (reservation.getStartTime() == null || reservation.getEndTime() == null) {
+            throw new IllegalArgumentException("La fecha y hora de inicio y fin son obligatorias");
+        }
+
+        if (reservation.getEndTime().isBefore(reservation.getStartTime()) || 
+            reservation.getEndTime().isEqual(reservation.getStartTime())) {
+            throw new IllegalArgumentException("La fecha y hora de fin deben ser posteriores a la de inicio");
+        }
+
+        boolean isRoomOccupied = reservationRepository.existsByRoomNameAndStartTimeLessThanAndEndTimeGreaterThan(
+            reservation.getRoomName(), 
+            reservation.getEndTime(), 
+            reservation.getStartTime()
+        );
+
+        if (isRoomOccupied) {
+            throw new IllegalStateException("La sala '" + reservation.getRoomName() + "' ya se encuentra reservada en ese horario.");
+        }
+        // ----------------------------------------------
 
         // 1. Categoría obligatoria y validación de existencia                    
         if (categoryId == null) {
@@ -114,6 +135,8 @@ public class ReservationService {
                                 .map(existingReservation -> {
             existingReservation.setRoomName(reservation.getRoomName());
             existingReservation.setReservedBy(reservation.getReservedBy());
+            existingReservation.setStartTime(reservation.getStartTime()); // <-- Añadir
+            existingReservation.setEndTime(reservation.getEndTime());         // <-- Añadir
 
             // 1. Categoría: si se proporciona un ID, se valida y se actualiza; 
             // si es null, se mantiene la categoría que ya tenía la reserva.
@@ -167,6 +190,11 @@ public class ReservationService {
         response.setId(reservation.getId());
         response.setRoomName(reservation.getRoomName());
         response.setReservedBy(reservation.getReservedBy());
+
+        // --- MAPEO DE FECHAS ---
+        response.setStartTime(reservation.getStartTime());
+        response.setEndTime(reservation.getEndTime());
+        // -----------------------
 
         if (reservation.getCategory() != null) {
             ReservationCategoryResponse categoryResponse = new ReservationCategoryResponse();

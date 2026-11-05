@@ -8,6 +8,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,6 +47,8 @@ class ReservationServiceTest {
         Reservation reservation = new Reservation();
         reservation.setRoomName("Sala Norte");
         reservation.setReservedBy("Ana");
+        reservation.setStartTime(LocalDateTime.now().plusDays(1));
+        reservation.setEndTime(LocalDateTime.now().plusDays(1).plusHours(2));
 
         ReservationCategory category = new ReservationCategory();
         category.setId(1L);
@@ -93,9 +96,13 @@ class ReservationServiceTest {
 
     @Test
     void shouldThrowExceptionWhenCategoryDoesNotExistOnCreate() {
+        
         Reservation reservation = new Reservation();
         reservation.setRoomName("Sala Sur");
         reservation.setReservedBy("Luis");
+        reservation.setStartTime(LocalDateTime.now().plusDays(1));
+        reservation.setEndTime(LocalDateTime.now().plusDays(1).plusHours(2));
+
 
         // Simulamos que la categoría 99L no existe en la base de datos
         when(reservationCategoryRepository.findById(99L)).thenReturn(Optional.empty());

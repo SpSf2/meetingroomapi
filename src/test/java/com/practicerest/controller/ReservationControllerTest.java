@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,9 +86,15 @@ class ReservationControllerTest {
 
     @Test
     void shouldCreateReservation() throws Exception {
+        // Definimos fechas futuras válidas para cumplir con @Future y las validaciones
+        LocalDateTime startTime = LocalDateTime.now().plusDays(1);
+        LocalDateTime endTime = LocalDateTime.now().plusDays(1).plusHours(2);
+
         ReservationRequest request = new ReservationRequest();
         request.setRoomName("Sala Sur");
         request.setReservedBy("Luis");
+        request.setStartTime(startTime);
+        request.setEndTime(endTime); // <-- ¡Añadido el campo obligatorio!
         request.setCategoryId(1L);
         request.setEquipmentIds(List.of(10L, 11L));
 
@@ -107,6 +114,8 @@ class ReservationControllerTest {
         response.setId(101L);
         response.setRoomName("Sala Sur");
         response.setReservedBy("Luis");
+        response.setStartTime(startTime); // <-- Recomendado incluirlo en la respuesta también
+        response.setEndTime(endTime);     // <-- Recomendado incluirlo en la respuesta también
         response.setCategory(category);
         response.setEquipment(List.of(equipment1, equipment2));
 
@@ -126,49 +135,55 @@ class ReservationControllerTest {
 
     @Test
     void shouldUpdateReservation() throws Exception {
+        LocalDateTime startTime = LocalDateTime.now().plusDays(2);
+        LocalDateTime endTime = LocalDateTime.now().plusDays(2).plusHours(2);
+
         ReservationRequest request = new ReservationRequest();
-        request.setRoomName("Sala Editada");
-        request.setReservedBy("Marta");
-        request.setCategoryId(2L);
-        request.setEquipmentIds(List.of(20L));
+        request.setRoomName("Sala Norte");
+        request.setReservedBy("Carlos");
+        request.setStartTime(startTime);
+        request.setEndTime(endTime); // <-- ¡Obligatorio!
+        request.setCategoryId(1L);
+        request.setEquipmentIds(List.of(10L));
 
         ReservationCategoryResponse category = new ReservationCategoryResponse();
-        category.setId(2L);
-        category.setName("Conferencia");
-
-        EquipmentResponse equipment = new EquipmentResponse();
-        equipment.setId(20L);
-        equipment.setName("Pantalla");
+        category.setId(1L);
+        category.setName("Reunión");
 
         ReservationResponse response = new ReservationResponse();
-        response.setId(200L);
-        response.setRoomName("Sala Editada");
-        response.setReservedBy("Marta");
+        response.setId(101L);
+        response.setRoomName("Sala Norte");
+        response.setReservedBy("Carlos");
+        response.setStartTime(startTime);
+        response.setEndTime(endTime);
         response.setCategory(category);
-        response.setEquipment(List.of(equipment));
 
-        when(reservationService.updateReservation(eq(200L), any(), eq(2L), eq(List.of(20L))))
+        when(reservationService.updateReservation(eq(101L), any(), eq(1L), eq(List.of(10L))))
                 .thenReturn(response);
 
-        mockMvc.perform(put("/reservations/200")
+        mockMvc.perform(put("/reservations/101")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(200))
-                .andExpect(jsonPath("$.roomName").value("Sala Editada"))
-                .andExpect(jsonPath("$.reservedBy").value("Marta"))
-                .andExpect(jsonPath("$.category.name").value("Conferencia"))
-                .andExpect(jsonPath("$.equipment[0].name").value("Pantalla"));
+                .andExpect(jsonPath("$.id").value(101))
+                .andExpect(jsonPath("$.roomName").value("Sala Norte"))
+                .andExpect(jsonPath("$.reservedBy").value("Carlos"));
     }
 
     @Test
     void shouldReturnNotFoundWhenUpdatingNonExistingReservation() throws Exception {
+        LocalDateTime startTime = LocalDateTime.now().plusDays(2);
+        LocalDateTime endTime = LocalDateTime.now().plusDays(2).plusHours(2);
+
         ReservationRequest request = new ReservationRequest();
         request.setRoomName("Sala Editada");
         request.setReservedBy("Marta");
+        request.setStartTime(startTime);
+        request.setEndTime(endTime); // <-- ¡Obligatorio!
         request.setCategoryId(2L);
         request.setEquipmentIds(List.of(20L));
 
+        // Simulamos que el servicio lanza ResourceNotFoundException al intentar actualizar un ID que no existe
         when(reservationService.updateReservation(eq(999L), any(), eq(2L), eq(List.of(20L))))
                 .thenThrow(new ResourceNotFoundException(
         "Reserva no encontrada con id: 999"

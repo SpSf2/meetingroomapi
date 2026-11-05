@@ -1,10 +1,13 @@
 package com.practicerest.dto.request;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -27,6 +30,22 @@ public class ReservationRequest {
     message = "Reserved by must contain only letters and spaces")
     private String reservedBy;
 
+    // --- NUEVOS CAMPOS OBLIGATORIOS ---
+    @Schema (description = "Fecha y hora de inicio de la reserva en formato ISO 8601",
+                 example = "2024-07-01T10:00:00")
+    @NotNull(message = "La fecha y hora de inicio son obligatorias")
+    @Future (message = "La fecha y hora de inicio deben ser futuras")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime startTime;
+
+    @Schema (description = "Fecha y hora de fin de la reserva en formato ISO 8601",
+                 example = "2024-07-01T12:00:00")
+    @NotNull(message = "La fecha y hora de fin son obligatorias")
+    @Future (message = "La fecha y hora de fin deben ser futuras")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime endTime;
+    // ----------------------------------
+
     @Schema(description = "ID de la categoría de la reserva", example = "1")
     @NotNull(message = "Category is required")
     @JsonProperty("categoryId") // <-- Fuerza a Jackson a mapearlo correctamente
@@ -41,11 +60,19 @@ public class ReservationRequest {
 
     public String getReservedBy() { return reservedBy; }
 
+    public LocalDateTime getStartTime() { return startTime; }
+
+    public LocalDateTime getEndTime() { return endTime; }
+
     public Long getCategoryId() { return categoryId; }
 
     public void setRoomName(String roomName) { this.roomName = roomName; }
 
     public void setReservedBy(String reservedBy) { this.reservedBy = reservedBy; }
+
+    public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
+
+    public void setEndTime(LocalDateTime endTime) { this.endTime = endTime; }
 
     public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
 

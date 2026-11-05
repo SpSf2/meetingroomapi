@@ -1,9 +1,11 @@
 package com.practicerest.entity;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -22,6 +24,13 @@ public class Reservation {
     private Long id;
     private String roomName;
     private String reservedBy;
+
+    // --- NUEVOS CAMPOS DE FECHA Y HORA ---
+    @Column(nullable = false)
+    private LocalDateTime startTime;
+
+    @Column(nullable = false)
+    private LocalDateTime endTime;
 
     @ManyToOne
     @JoinColumn(name = "category_id")
@@ -48,11 +57,19 @@ public class Reservation {
 
     public String getReservedBy() {  return reservedBy;  }
 
+    public LocalDateTime getStartTime() { return startTime; }
+
+    public LocalDateTime getEndTime() { return endTime; }
+
     public void setId(Long id) {  this.id = id;  }
 
     public void setRoomName(String roomName) {  this.roomName = roomName; }
 
     public void setReservedBy(String reservedBy) {  this.reservedBy = reservedBy; }
+
+    public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
+
+    public void setEndTime(LocalDateTime endTime) { this.endTime = endTime; }
 
     public ReservationCategory getCategory() {  return category;  }
 
